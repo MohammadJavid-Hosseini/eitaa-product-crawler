@@ -1,0 +1,22 @@
+services:
+  redis:
+    image: redis:8.0-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - crawler_net
+
+  crawler_app:
+    build: .
+    volumes:
+      - ./src:/app/src
+    environment:
+      - REDIS_HOST=redis
+      - EITAA_API_KEY=eitaa_redis_key
+    depends_on:
+      - redis
+    networks:
+      - crawler_net
+
+networks:
+  crawler_net:
