@@ -12,6 +12,8 @@ services:
       - ./src:/app/src
     environment:
       - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_QUEUE_NAME=product_jobs
       - EITAA_API_KEY=eitaa_redis_key
     depends_on:
       - redis

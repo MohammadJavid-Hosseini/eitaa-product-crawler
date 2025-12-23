@@ -4,7 +4,7 @@ import logging
 
 
 class QueueHandler:
-    def init(self, host: str, port: int, queue_name: str):
+    def __init__(self, host: str, port: int, queue_name: str):
         self.queue_name = queue_name
         self.client = redis.Redis(
             host=host,
