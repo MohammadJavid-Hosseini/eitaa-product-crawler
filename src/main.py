@@ -1,6 +1,8 @@
 import logging
 import config
 from core.queue_handler import QueueHandler
+from core.session_manager import SessionManager
+from core.rate_limiter import RateLimiter
 from crawler.crawler import Crawler
 from discovery.search import discover_channels
 from validation.channel_validator import validate_channels
@@ -27,7 +29,10 @@ def main():
     validated_channels = validate_channels(discovered_channels)
     logging.info("Validated %s channels", len(validated_channels))
 
-    crawler = Crawler(queue)
+    session_manager = SessionManager()
+    rate_limiter = RateLimiter()
+    session_manager.add_session("1234ioq", "ali_test")
+    crawler = Crawler(queue, session_manager, rate_limiter)
 
     for channel in validated_channels:
         crawler.crawl_channel(channel)

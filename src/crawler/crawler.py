@@ -1,18 +1,37 @@
+import logging
 from typing import List, Dict
 from uuid import uuid4
 from datetime import datetime
 
 from .extractor import extract_product
 from core.queue_handler import QueueHandler
+from core.session_manager import SessionManager, EitaaSession
+from core.rate_limiter import RateLimiter
 
 
 class Crawler:
-    def __init__(self, queue: QueueHandler):
+    def __init__(
+        self,
+        queue: QueueHandler,
+        session_manager: SessionManager,
+        rate_limiter: RateLimiter
+    ):
         self.queue = queue
+        self.session_manager = session_manager
+        self.rate_limiter = rate_limiter
 
     def crawl_channel(self, channel: Dict) -> None:
         "Crawl a single channel and push product jobs to Redis"
-        messages = self._fetch_messages(channel)
+        # first choose the session
+        session = self.session_manager.get_next_available_session()
+        if not session:
+            logging.info("No session is available, skipping...")
+            return
+
+        # slow down the process
+        self.rate_limiter.wait()
+
+        messages = self._fetch_messages(channel, session)
 
         for message in messages:
             product = extract_product(message)
@@ -22,20 +41,14 @@ class Crawler:
             job = self._build_job(channel, message, product)
             self.queue.push(job)
 
-    def _fetch_messages(self, channel: Dict) -> List[Dict]:
+    def _fetch_messages(
+            self, channel: Dict, session: EitaaSession) -> List[Dict]:
         "fetch the messages from a single channel"
-        # HACK: mock message fetcher; later it must be dynamic
+        # HACK: mock message fetcher; later it must be real Eitaa codes
+        # return session.client.get_messages(channel['id'])
         return [
-            {
-                "id": "p1",
-                "text": "فروش به صرفه ترین لپتاپ نسل 13: فقط 30 میلیون تومان",
-                "images": ["https://example2.com/image_laptop.jpg"]
-            },
-            {
-                "id": "p3",
-                "text": "نباید بره",
-                "images": []
-            }
+            {"id": "p1", "text": "لپتاپ 30 تومانی", "images": ["img1.jpg"]},
+            {"id": "p3", "text": "نامرتبط", "images": []}
         ]
 
     def _build_job(self, channel: Dict, message: Dict, product: Dict) -> Dict:
