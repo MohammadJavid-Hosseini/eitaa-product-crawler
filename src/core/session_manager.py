@@ -14,9 +14,9 @@ class EitaaSession:
     def mark_rate_limited(self, minutes: int = 15):
         "Make the limited session unavailable for a while"
         self.is_active = False
-        self.cool_donw_until = datetime.now() + timedelta(minutes=minutes)
+        self.cool_down_until = datetime.now() + timedelta(minutes=minutes)
         logging.info(
-            f"session {self.session_id} is rate limited until {self.cool_donw_until}")
+            f"session {self.session_id} is rate limited until {self.cool_down_until}")
 
     def check_health(self):
         "Make the formerly limited session active again if it's the time"
