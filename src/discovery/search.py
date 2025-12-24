@@ -11,8 +11,8 @@ def search_channels(keyword: str) -> List[Dict]:
             "username": f"{keyword}_shop"
         },
         {
-            "id": f"channel_{keyword}_2",
-            "username": f"{keyword}_news"
+            "id": "channel_2",
+            "username": "the_world_news"
         }
     ]
 
