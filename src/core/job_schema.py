@@ -18,6 +18,6 @@
 
     "metadata": {
         "crawled_at": "2025-08-23T10:15:29Z",
-        "has_picture": True
+        "has_price": True
     }
 }
