@@ -2,6 +2,7 @@ import logging
 import config
 from core.queue_handler import QueueHandler
 from crawler.crawler import Crawler
+from discovery.search import discover_channels
 
 
 def main():
@@ -18,12 +19,9 @@ def main():
 
     crawler = Crawler(queue)
 
-    validated_channels = [
-        {
-            "id": "channel_1",
-            "username": "shop_channel_1"
-            }
-        ]
+    discovered_channels = discover_channels()
+    # HACK: for now validation is for granted
+    validated_channels = discovered_channels
 
     for channel in validated_channels:
         crawler.crawl_channel(channel)

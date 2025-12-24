@@ -24,5 +24,6 @@ def extract_product(message: Dict, ) -> Dict | None:
         "message_id": message.get("id", ""),
         "text": text,
         "images": message.get("images", []),
+        # FIX: it must use AI to find the price
         "has_price": True
     }
