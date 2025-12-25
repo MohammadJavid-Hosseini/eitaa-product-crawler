@@ -32,6 +32,7 @@ def main():
     rate_limiter = RateLimiter()
     session_manager.add_session("1234ioq", "ali_test")
 
+    # instanciate AI worker
     ai_service = CoreAIService()
     keyword_gen = KeywordGenerator(ai_service)
 
