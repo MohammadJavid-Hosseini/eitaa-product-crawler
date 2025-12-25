@@ -1,5 +1,6 @@
 import logging
 import config
+import argparse
 from core.queue_handler import QueueHandler
 from core.session_manager import SessionManager
 from core.rate_limiter import RateLimiter
@@ -10,6 +11,17 @@ from validation.channel_validator import validate_channels
 from crawler.crawler import Crawler
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Eitaa Product Crawler")
+    parser.add_argument(
+        "--category",
+        type=str,
+        default="کالا و محصولات فروشی",
+        help="Product category for discovery (default: کالا و محصولات فروشی)"
+    )
+    return parser.parse_args()
+
+
 def main():
     # logging settings
     logging.basicConfig(
@@ -18,6 +30,9 @@ def main():
     )
 
     logging.info("Started Eitaa product crawler (MVP)")
+
+    # parsing the user args
+    args = parse_args()
 
     # make the queue
     queue = QueueHandler(
@@ -38,7 +53,10 @@ def main():
 
     # FIX: later the category comes from user or settings
     discovered_channels = discover_channels(
-        category='پوشاک مردانه', keyword_gen=keyword_gen)
+        category=args.category,
+        keyword_gen=keyword_gen
+    )
+    logging.info(f"Search for category: {args.category}")
     logging.info("Discovered %s channels", len(discovered_channels))
 
     validated_channels = validate_channels(discovered_channels)
