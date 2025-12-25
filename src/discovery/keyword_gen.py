@@ -1,3 +1,4 @@
+import logging
 from typing import List
 from core.ai_service import CoreAIService
 
@@ -21,4 +22,5 @@ class KeywordGenerator:
             for kw in raw_output.replace('\n', ',').split(',')
             if len(kw.strip()) > 2
         ]
+        logging.info(f"Generated keywords by AI: {keywords[:10]}")
         return keywords[:10] if keywords else [category]

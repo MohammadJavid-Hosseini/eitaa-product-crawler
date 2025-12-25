@@ -3,9 +3,11 @@ import config
 from core.queue_handler import QueueHandler
 from core.session_manager import SessionManager
 from core.rate_limiter import RateLimiter
-from crawler.crawler import Crawler
+from core.ai_service import CoreAIService
 from discovery.search import discover_channels
+from discovery.keyword_gen import KeywordGenerator
 from validation.channel_validator import validate_channels
+from crawler.crawler import Crawler
 
 
 def main():
@@ -30,7 +32,12 @@ def main():
     rate_limiter = RateLimiter()
     session_manager.add_session("1234ioq", "ali_test")
 
-    discovered_channels = discover_channels()
+    ai_service = CoreAIService()
+    keyword_gen = KeywordGenerator(ai_service)
+
+    # FIX: later the category comes from user or settings
+    discovered_channels = discover_channels(
+        category='پوشاک مردانه', keyword_gen=keyword_gen)
     logging.info("Discovered %s channels", len(discovered_channels))
 
     validated_channels = validate_channels(discovered_channels)

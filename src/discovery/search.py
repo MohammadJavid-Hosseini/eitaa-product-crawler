@@ -1,5 +1,5 @@
 from typing import Dict, List
-from .keyword_gen import generate_keywords
+from .keyword_gen import KeywordGenerator
 
 
 def search_channels(keyword: str) -> List[Dict]:
@@ -17,10 +17,11 @@ def search_channels(keyword: str) -> List[Dict]:
     ]
 
 
-def discover_channels() -> List[Dict]:
+def discover_channels(category: str, keyword_gen: KeywordGenerator) -> List[Dict]:
     "Discover candidate channels using generated keywords"
     discovered = []
-    keywords = generate_keywords()
+
+    keywords = keyword_gen.generate_buying_keywords(category)
 
     for kw in keywords:
         channels = search_channels(kw)
