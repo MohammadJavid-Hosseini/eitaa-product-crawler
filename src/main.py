@@ -9,6 +9,7 @@ from validation.channel_validator import validate_channels
 
 
 def main():
+    # logging settings
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(message)s"
@@ -16,6 +17,7 @@ def main():
 
     logging.info("Started Eitaa product crawler (MVP)")
 
+    # make the queue
     queue = QueueHandler(
         host=config.REDIS_HOST,
         port=config.REDIS_PORT,
@@ -23,15 +25,17 @@ def main():
     )
     logging.info("the pfoduct_jobs queue is created")
 
+    # initialize the session-manager and the rate-limiter
+    session_manager = SessionManager()
+    rate_limiter = RateLimiter()
+    session_manager.add_session("1234ioq", "ali_test")
+
     discovered_channels = discover_channels()
     logging.info("Discovered %s channels", len(discovered_channels))
 
     validated_channels = validate_channels(discovered_channels)
     logging.info("Validated %s channels", len(validated_channels))
 
-    session_manager = SessionManager()
-    rate_limiter = RateLimiter()
-    session_manager.add_session("1234ioq", "ali_test")
     crawler = Crawler(queue, session_manager, rate_limiter)
 
     for channel in validated_channels:
