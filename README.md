@@ -124,8 +124,8 @@ Return ONLY the keywords separated by commas.
 ابتدا پروژه را clone کنید:
 
 ```bash
-git clone <repository-url>
-cd eitaa-crawler
+git clone git@github.com:MohammadJavid-Hosseini/eitaa-product-crawler.git
+cd eitaa-product-crawler
 ```
 
 سپس سرویس ها را اجرا کنید:
