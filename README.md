@@ -104,7 +104,9 @@ Generate 10 Persian search keywords to find '<category>' shops on a messenger.
 Focus on commercial intent like online buying, discounts, delivery, pricing.
 Return ONLY the keywords separated by commas.
 ```
-در نسخه MVP، پاسخ AI به‌صورت شبیه‌سازی‌شده پیاده‌سازی شده است و اتصال به مدل واقعی در فازهای بعدی بدون تغییر معماری امکان‌پذیر خواهد بود.
+### اتصال به مدل زبانی هوش مصنوعی
+
+سرویس AI برنامه به OpenAI API متصل شده است و تولید کلمات کلیدی به‌صورت داینامیک انجام می‌شود.
 
 ---
 
@@ -126,6 +128,20 @@ Return ONLY the keywords separated by commas.
 ```bash
 git clone <repository-url>
 cd eitaa-crawler
+```
+فراموش نکنید که متغیر محیطی هوش مصنوعی OpenAI را دریافت نموده و تنظیم کنید.
+
+
+برای فعال‌سازی:
+1. ابتدا باید لاگین کرده و یک API Key از OpenAI دریافت کنید
+
+https://platform.openai.com/
+https://platform.openai.com/api-keys
+
+2. متغیر محیطی زیر را تنظیم کنید:
+
+```bash
+export OPENAI_API_KEY=your_api_key_here
 ```
 
 سپس سرویس ها را اجرا کنید:
