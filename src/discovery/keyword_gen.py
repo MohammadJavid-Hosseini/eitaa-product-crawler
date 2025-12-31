@@ -12,15 +12,29 @@ class KeywordGenerator:
             f"""
             Generate 10 Persian search keywords to find '{category}' shops on a messenger.
             Focus on commercial intent like 'ارسال رایگان' or 'خرید آنلاین'.
-            Return ONLY the keywords separated by commas..
+            Return ONLY the keywords separated by commas.
             """
         )
 
         raw_output = self.ai.ask(prompt)
+        if not raw_output:
+            return self._fallback_keywords(category)
+
         keywords = [
             kw.strip()
             for kw in raw_output.replace('\n', ',').split(',')
             if len(kw.strip()) > 2
         ]
-        logging.info(f"Generated keywords by AI: {keywords[:10]}")
-        return keywords[:10] if keywords else [category]
+        if keywords:
+            logging.info(f"Generated keywords by AI: {keywords[:10]}")
+            return keywords[:10]
+        return self._fallback_keywords(category)
+
+    def _feedback_keywords(self, category: str) -> List[str]:
+        logging.warning("Using fallback keywords for category: %s", category)
+        return [
+            category,
+            "خرید",
+            "فروش",
+            "آنلاین"
+        ]
