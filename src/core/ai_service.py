@@ -10,12 +10,13 @@ class CoreAIService:
         model: str = 'gpt-4o-mini',
         max_tokens: int = 120,
         timeout: int = 10,
-        max_retries: int = 2
+        max_retries: int = 0
     ):
         self.model = model
         self.max_tokens = max_tokens
         self.timeout = timeout
         self.max_retries = max_retries
+        self.disabled = False
 
         # fetch API key
         self.api_key = os.getenv("OPENAI_API_KEY")
@@ -33,6 +34,9 @@ class CoreAIService:
 
     def ask(self, prompt: str) -> str:
         "Send a prompt to the AI model and return response"
+
+        if self.disabled:
+            return ""
 
         for attempt in range(1, self.max_retries + 2):
             try:
@@ -55,12 +59,10 @@ class CoreAIService:
 
             except Exception as e:
                 logging.error(
-                    "AI request failed: (attempt %s/%s): %s",
-                    attempt, self.max_retries + 1, e
+                    "AI request failed: (attempt %s): %s",
+                    attempt, e
                     )
 
-                if attempt <= self.max_retries:
-                    time.sleep(2 ** attempt)
-                logging.error("AI service unavailable after retires")
-
+        logging.error("AI permanently disabled for this run")
+        self.disabled = True
         return ""

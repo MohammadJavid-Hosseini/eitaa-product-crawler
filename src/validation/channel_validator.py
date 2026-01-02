@@ -1,68 +1,67 @@
-from typing import List, Dict
+import logging
+from typing import Dict
 from core.ai_service import CoreAIService
 
 
-def is_shop_channel_rule_based(channel: Dict) -> bool:
-    "Determine if the given channel is a shop channel"
-    # HACK: role-based validation for now checking only username and bio;
-    # later use AI and check the last posts as well
+class ChannelValidator:
+    def __init__(self, ai_service: CoreAIService, use_ai: bool = True):
+        self.ai = ai_service
+        self.use_ai = use_ai
 
-    SHOP_KEYWODS = ["ارسال", "سفارش", "قیمت", "خرید", "فروش"]
-    text = " ".join([
-        channel.get("username", ""),
-        channel.get("bio", "")
-    ])
+    def validate(self, channel: Dict) -> bool:
+        "Return True if channel is considered a shop channel"
 
-    return any(keyword in text for keyword in SHOP_KEYWODS)
+        if self.ai.disabled:
+            logging.warning(
+                "AI unavailable, switching to rule-based validation")
+            self.use_ai = False
 
+        # fast rule-based rejection
+        if self._rule_based_reject(channel):
+            return False
 
-def is_shop_channel_ai(channel: Dict, ai: CoreAIService) -> bool:
-    "AI-based validation of shop channels using username, bio, and recent posts."
+        # AI-based validation
+        if self.use_ai:
+            return self._ai_validate(channel)
 
-    recent_posts = channel.get("recent_posts", [])
-
-    posts_text = "\n".join(
-        f"- {post.get('text', '')}"
-        for post in recent_posts[:10]
-    )
-
-    prompt = f"""
-        You are classifying messaging channels.
-        Determine whether the following channel is a SHOP / SELLER channel.
-
-        Use these signals:
-        - commercial intent
-        - selling products
-        - prices, ordering, delivery, promotions
-
-        Channel information:
-        Username: {channel.get("username", "")}
-        Bio: {channel.get("bio", "")}
-
-        Last posts:
-        {posts_text}
-
-        Answer ONLY with:
-        yes
-        or
-        no
-        """
-
-    response = ai.ask(prompt).strip().lower()
-    return response == "yes"
-
-
-def is_shop_channel(channel: Dict, ai: CoreAIService | None = None) -> bool:
-    if is_shop_channel_rule_based(channel):
         return True
 
-    if ai:
-        return is_shop_channel_ai(channel, ai)
+    def _rule_based_reject(self, channel):
+        "Checks simply to avoid overusing AI validation"
 
-    return False
+        username = channel.get("username", "").lower()
+        # this list or this mechanism can improve later
+        blacklist = ["اخبار", "آموزش", "فان", "جوک"]
+        return any(word in username for word in blacklist)
 
+    def _ai_validate(self, channel: Dict) -> bool:
+        prompt = self._build_prompt(channel)
+        response = self.ai.ask(prompt)
 
-def validate_channels(channels: List[Dict], ai=None) -> List[Dict]:
-    "Filter and return only shop channels"
+        if not response:
+            logging.warning("AI validation failed for channel")
+            return False
 
-    return [ch for ch in channels if is_shop_channel(ch, ai)]
+        return response.strip().upper() == "YES"
+
+    def _build_prompt(self, channel: Dict) -> str:
+        posts_text = "\n".join(
+            post.get("text", "") for post in channel.get("recent_posts", [])[:10]
+        )
+
+        return f"""
+You are given information about a messenger channel.
+Username:
+{channel.get("username", "")}
+Bio:
+{channel.get("bio", "")}
+Last posts:
+{posts_text}
+
+Question:
+Is this channel primarily a product-selling or commercial channel?
+
+Rules:
+- Answer only with "YES" or "NO"
+- Do not explain
+""".strip()

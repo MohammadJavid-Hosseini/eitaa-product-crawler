@@ -41,6 +41,7 @@ class Crawler:
             job = self._build_job(channel, message, product)
             self.queue.push(job)
 
+    # TODO: sync _fetch_messages and _build_prompt in channel_validator.
     def _fetch_messages(
             self, channel: Dict, session: EitaaSession) -> List[Dict]:
         "fetch the messages from a single channel"

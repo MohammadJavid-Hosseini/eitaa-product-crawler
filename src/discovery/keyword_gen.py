@@ -30,7 +30,7 @@ class KeywordGenerator:
             return keywords[:10]
         return self._fallback_keywords(category)
 
-    def _feedback_keywords(self, category: str) -> List[str]:
+    def _fallback_keywords(self, category: str) -> List[str]:
         logging.warning("Using fallback keywords for category: %s", category)
         return [
             category,

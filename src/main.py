@@ -7,7 +7,7 @@ from core.rate_limiter import RateLimiter
 from core.ai_service import CoreAIService
 from discovery.search import discover_channels
 from discovery.keyword_gen import KeywordGenerator
-from validation.channel_validator import validate_channels
+from validation.channel_validator import ChannelValidator
 from crawler.crawler import Crawler
 
 
@@ -51,7 +51,9 @@ def main():
     ai_service = CoreAIService()
     keyword_gen = KeywordGenerator(ai_service)
 
-    # FIX: later the category comes from user or settings
+    # instanciate validator
+    validator = ChannelValidator(ai_service)
+
     discovered_channels = discover_channels(
         category=args.category,
         keyword_gen=keyword_gen
@@ -59,7 +61,9 @@ def main():
     logging.info(f"Search for category: {args.category}")
     logging.info("Discovered %s channels", len(discovered_channels))
 
-    validated_channels = validate_channels(discovered_channels)
+    validated_channels = [
+        ch for ch in discovered_channels if validator.validate(ch)
+    ]
     logging.info("Validated %s channels", len(validated_channels))
 
     crawler = Crawler(queue, session_manager, rate_limiter)
